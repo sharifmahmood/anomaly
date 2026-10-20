@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import scipy.spatial.distance as dist
 from scipy.spatial.distance import cdist
 from scipy.sparse import csr_matrix
@@ -245,3 +246,32 @@ def get_metrics(score, y, m):
     RP = np.mean((len(y) - np.array(ranks) + 1) / len(y))
     
     return {"mt": mt, "Re": Re, "RP": RP}
+
+def make_results_table(X, y, k, m_values):
+    knn_s = score_knn(X, k=k)
+    lof_s = score_lof(X, k=k)
+    loci_s = score_loci(X, k=k)
+    inflo_s = score_inflo(X, k=k)
+    cof_s = score_cof(X, k=k)
+    ccof_s = score_ccof(X, k=k)
+    
+    out = []
+    for m in m_values:
+        a = get_metrics(knn_s, y, m)
+        b = get_metrics(lof_s, y, m)
+        c = get_metrics(loci_s, y, m)
+        d = get_metrics(inflo_s, y, m)
+        e = get_metrics(cof_s, y, m)
+        f = get_metrics(ccof_s, y, m)
+        
+        out.append({
+            "m": m,
+            "knn_mt": a["mt"], "knn_Re": a["Re"], "knn_RP": a["RP"],
+            "lof_mt": b["mt"], "lof_Re": b["Re"], "lof_RP": b["RP"],
+            "loci_mt": c["mt"], "loci_Re": c["Re"], "loci_RP": c["RP"],
+            "inflo_mt": d["mt"], "inflo_Re": d["Re"], "inflo_RP": d["RP"],
+            "cof_mt": e["mt"], "cof_Re": e["Re"], "cof_RP": e["RP"],
+            "ccof_mt": f["mt"], "ccof_Re": f["Re"], "ccof_RP": f["RP"]
+        })
+        
+    return pd.DataFrame(out)
